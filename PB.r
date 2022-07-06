@@ -6,6 +6,7 @@
 #' @param input a single-cell matrix to be converted, with features (genes) in rows
 #'   and cells in columns. Alternatively, a \code{Seurat}, \code{monocole3}, or 
 #'   or \code{SingleCellExperiment} object can be directly input.
+#' @param fun a character string. Specifies the function to use as summary statistic.
 #' @param meta the accompanying meta data whereby the rownames match the column
 #'   names of \code{input}.
 #' @param replicate_col the vector in \code{meta} containing the replicate 
@@ -63,7 +64,7 @@
 #' @export
 #' 
 to_pseudobulk = function(input,
-                         fun,
+                         fun = "mean",
                          meta = NULL, 
                          replicate_col = 'replicate',
                          cell_type_col = 'cell_type',
