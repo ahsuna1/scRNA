@@ -117,8 +117,27 @@ to_pseudobulk = function(input,
         return(NA)
       
       # process data into gene X replicate X cell_type matrice
-      mm = model.matrix(~ 0 + replicate:label, data = meta0)
-      mat_mm = expr0 %*% mm
+      
+      mat_mm = parallel::lcmapply(
+        unique(replicate:label, data = meta0),
+        if (fun == "sum"){
+          function(x){Matrix::rowSums(SingleCellExperiment::counts(sce[, replicate:label, data == x]))},
+            mc.cores = future::availableCores())
+          } else if (fun == "mean"){
+          function(x){Matrix::rowMeans(SingleCellExperiment::counts(sce[, replicate:label, data == x]))},
+            mc.cores = future::availableCores())
+          } else{
+          function(x){Matrix::rowMedians(SingleCellExperiment::counts(sce[, replicate:label, data == x]))},
+            mc.cores = future::availableCores())
+          }
+          pb_matrix <- Reduce(cbind, pb_matrix)
+          colnames(pb_matrix) <- unique(replicate:label, data = meta0)
+          
+        
+      
+      
+      #mm = model.matrix(~ 0 + replicate:label, data = meta0)
+      #mat_mm = expr0 %*% mm
       keep_genes = if (fun == "sum"){
         Matrix::rowSums(mat_mm > 0) > min_features
         } else if (fun == "mean") {
