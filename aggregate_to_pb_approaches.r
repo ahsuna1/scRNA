@@ -99,6 +99,8 @@ to_pseudobulk = function(input,
     pull(cell_type) %>%
     unique()
   
+  
+  
   # process data into gene x replicate x cell_type matrices
   pseudobulks = keep %>%
     map( ~ {
@@ -115,6 +117,19 @@ to_pseudobulk = function(input,
         pull(replicates)
       if (any(replicate_counts < min_reps))
         return(NA)
+      
+      ## pseudobulk gene expression per cell-type
+      getPseudobulk <- function(input, celltype) {
+        mat.summary <- do.call(cbind, lapply(levels(celltype), function(ct) {
+          cells <- names(celltype)[celltype==ct]
+          pseudobulk <- rowSums(mat[, cells])
+          return(pseudobulk)
+          }))
+      colnames(mat.summary) <- levels(celltype)
+      return(mat.summary)
+      }
+      
+      
       
       # process data into gene X replicate X cell_type matrice
       
@@ -133,11 +148,21 @@ to_pseudobulk = function(input,
           #pb_matrix <- Reduce(cbind, pb_matrix)
           #colnames(pb_matrix) <- unique(replicate:label, data = meta0)
           
-        
+     #Add different aggregation approaches.
       
       
-      mm = model.matrix(~ 0 + replicate:label, data = meta0)
-      mat_mm = expr0 %*% mm
+      pb_matrix_l <- parallel::mclapply(
+        unique(replicate:label),
+        function(x) {Matrix::rowSums(SingleCellExperiment::counts(expr0[, replicate:label == x]))},
+        mc.cores = future::availableCores())
+      pb_matrix <- Reduce(cbind, pb_matrix_l)
+      colnames(pb_matrix) <- unique(replicate:label)
+
+      
+      # Linear Algebra Approach - Works fast with Sparse Matrix.
+      
+      #mm = model.matrix(~ 0 + replicate:label, data = meta0)
+      #mat_mm = expr0 %*% mm
       keep_genes = if (fun == "sum"){
         Matrix::rowSums(mat_mm > 0) > min_features
         } else if (fun == "mean") {
@@ -152,7 +177,7 @@ to_pseudobulk = function(input,
       
       keep_samples = colSums(mat_mm) > 0
       mat_mm %<>% magrittr::extract(, keep_samples)
-      return(mat_mm)
+      return(pb_matrix_l)
     }) %>%
     setNames(keep)
   
