@@ -119,15 +119,15 @@ to_pseudobulk = function(input,
         return(NA)
       
       ## pseudobulk gene expression per cell-type
-      getPseudobulk <- function(input, celltype) {
-        mat.summary <- do.call(cbind, lapply(levels(celltype), function(ct) {
-          cells <- names(celltype)[celltype==ct]
-          pseudobulk <- rowSums(mat[, cells])
-          return(pseudobulk)
-          }))
-      colnames(mat.summary) <- levels(celltype)
-      return(mat.summary)
-      }
+      #getPseudobulk <- function(input, celltype) {
+       # mat.summary <- do.call(cbind, lapply(levels(celltype), function(ct) {
+        #  cells <- names(celltype)[celltype==ct]
+         # pseudobulk <- rowSums(mat[, cells])
+         # return(pseudobulk)
+          #}))
+      #colnames(mat.summary) <- levels(celltype)
+      #return(mat.summary)
+      #}
       
       
       
