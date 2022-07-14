@@ -55,6 +55,7 @@
 #'   Defaults to \code{0}   
 #' @return a list of pseudobulk matrices, for each cell type.
 #'  
+#' @importFrom matrixStats rowMedians
 #' @importFrom magrittr %<>% extract
 #' @importFrom dplyr %>% rename_ count group_by filter pull n_distinct distinct
 #'   summarise
